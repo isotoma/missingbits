@@ -10,7 +10,7 @@ missingbits:range
 -------------------
 
 This recipe takes a string and will make a list out of it. For example, where as you
-could write:
+could write::
 
     [buildout]
     parts = cluster
@@ -32,7 +32,7 @@ could write:
         ${buildout:bin-directory}/zope1 stop
         ${buildout:bin-directory}/zope0 stop
 
-You can write:
+You can write::
 
     [buildout]
     parts = cluster
@@ -55,7 +55,7 @@ the same site.
 missingbits:clone
 -------------------
 
-A site with 4 zopes might look something like this:
+A site with 4 zopes might look something like this::
 
     [buildout]
     parts =
@@ -89,7 +89,7 @@ A site with 4 zopes might look something like this:
     z2-log = /var/log/zope/www.foo.bar.zope3.Z2.log
 
 When the number of zopes can change, we really need to make this more manageable. We
-could do this instead:
+could do this instead::
 
     [buildout]
     parts = ${zope-factory:parts}
@@ -112,7 +112,7 @@ missingbits:echo
 While testing these recipes it was handy to have a no-op recipe that just printed
 some text. This is that recipe.
 
-You can print text from your buildout like so:
+You can print text from your buildout like so::
 
     [buildout]
     parts = echo
