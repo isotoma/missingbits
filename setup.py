@@ -32,7 +32,8 @@ setup(
     ],
     entry_points = {
         "zc.buildout": [
-            "list = missingbits.list:list",
+            "range = missingbits.range:Range",
+            "echo = missingbits.echo:Echo",
         ],
     }
 )
