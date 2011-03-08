@@ -1,12 +1,12 @@
-MissingThings
-=============
+missingbits
+===========
 
 This package provides several recipes you can use if you find your self duplicating
 lots of config. It also has echo, which turned out to be useful for testing.
 
 It was created for a site which uses 1, 3 or 9 zopes depending on a set of conditions.
 
-missingthings:range
+missingbits:range
 -------------------
 
 This recipe takes a string and will make a list out of it. For example, where as you
@@ -38,7 +38,7 @@ You can write:
     parts = cluster
 
     [zopes]
-    recipe = missingthings:range
+    recipe = missingbits:range
     stop = 6
     cluster-start = ${buildout:bin-directory}/zope{0} start
     cluster-stop = ${buildout:bin-directory}/zope{0} stop
@@ -52,7 +52,7 @@ This is most useful when the number of zopes might vary for different builds of
 the same site.
 
 
-missingthings:clone
+missingbits:clone
 -------------------
 
 A site with 4 zopes might look something like this:
@@ -101,12 +101,12 @@ could do this instead:
     z2-log = /var/log/zope/www.foo.bar.zope{0}.Z2.log
 
     [zope-factory]
-    recipe = missingthings:clone
+    recipe = missingbits:clone
     template = zope{0}
     count = 4
 
 
-missingthings:echo
+missingbits:echo
 ------------------
 
 While testing these recipes it was handy to have a no-op recipe that just printed
@@ -118,6 +118,33 @@ You can print text from your buildout like so:
     parts = echo
 
     [echo]
-    recipe = missingthings:echo
+    recipe = missingbits:echo
     echo = Any text you want here
+
+
+Repository
+----------
+
+This software is available from our `recipe repository`_ on github.
+
+.. _`recipe repository`: http://github.com/isotoma/missingbits
+
+
+License
+-------
+
+Copyright 2011 Isotoma Limited
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+  http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+
 
