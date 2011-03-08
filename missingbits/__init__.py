@@ -50,8 +50,9 @@ class Cloner(object):
         parts = []
         for i in range(start, stop, step):
             name = options["template"].format(i)
-            o = Options(buildout, name, template)
+            config = dict((k, v.format(i)) for (k, v) in template.iteritems())
 
+            o = Options(buildout, name, config)
             buildout._data[name] = o
             o._initialize()
 

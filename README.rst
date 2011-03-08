@@ -40,8 +40,8 @@ You can write::
     [zopes]
     recipe = missingbits:range
     stop = 6
-    cluster-start = ${buildout:bin-directory}/zope{0} start
-    cluster-stop = ${buildout:bin-directory}/zope{0} stop
+    cluster-start = ${{buildout:bin-directory}}/zope{0} start
+    cluster-stop = ${{buildout:bin-directory}}/zope{0} stop
 
     [cluster]
     recipe = plone.recipe.cluster
@@ -96,7 +96,7 @@ could do this instead::
 
     [zope{0}]
     <= instance
-    http-address = ${hosts:zope}:${ports:zope{0}}
+    http-address = ${{hosts:zope}}:${{ports:zope{0}}}
     event-log = /var/log/zope/www.foo.bar.zope{0}.event.log
     z2-log = /var/log/zope/www.foo.bar.zope{0}.Z2.log
 
