@@ -32,8 +32,9 @@ setup(
     ],
     entry_points = {
         "zc.buildout": [
-            "range = missingbits.range:Range",
-            "echo = missingbits.echo:Echo",
+            "range = missingbits:Range",
+            "clone = missingbits:Cloner",
+            "echo = missingbits:Echo",
         ],
     }
 )
