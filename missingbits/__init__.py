@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from zc.buildout.buildout import Options
-
 
 class Range(object):
 
@@ -52,9 +50,7 @@ class Cloner(object):
             name = options["template"].format(i)
             config = dict((k, v.format(i)) for (k, v) in template.iteritems())
 
-            o = Options(buildout, name, config)
-            buildout._data[name] = o
-            o._initialize()
+            buildout._raw[name] = config
 
             parts.append(name)
         print parts
