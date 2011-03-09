@@ -93,7 +93,7 @@ When the number of zopes can change, we really need to make this more manageable
 could do this instead::
 
     [buildout]
-    parts = ${zope-factory:parts}
+    parts = zope-factory
 
     [zope{0}]
     <= instance
