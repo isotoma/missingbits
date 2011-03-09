@@ -53,8 +53,11 @@ class Cloner(object):
             buildout._raw[name] = config
 
             parts.append(name)
-        print parts
+
         options["parts"] = "\n".join(parts)
+
+        if options.get("trigger-dependencies", "true").lower() in ("true", "yes", "on"):
+            [buildout[part] for part in parts]
 
     def install(self):
         return ()

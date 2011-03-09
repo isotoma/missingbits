@@ -6,8 +6,6 @@ lots of config. It also has echo, which turned out to be useful for testing.
 
 It was created for a site which uses 1, 3 or 9 zopes depending on a set of conditions.
 
-It currently *cannot* be deployed in anger because the egg would need to be installed
-too soon in buildout startup for this to work :(
 
 missingbits:range
 -------------------
