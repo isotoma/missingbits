@@ -52,9 +52,33 @@ You can write::
 This is most useful when the number of zopes might vary for different builds of
 the same site.
 
+Parameters
+~~~~~~~~~~
+
+start
+    Number to start the range at (Default: 0, Optional)
+stop
+    Number to stop at, but not including. So start of 0 and stop of 6 will get you [0,1,2,3,4,5]. (Mandatory).
+step
+    Number to increment by. (Default: +1, Optional)
+foo
+    Foo is any variable you choose to set on the recipe. A number of duplicates will be made of it and
+    a newline seperated list placed in an output variable. Any occurence of {0} will be replaced with
+    a number for the item in the range we are up to. You can delay evaluation of any buildout variables
+    you are using by escaping them ({{ and }}). If you don't do this, buildout will have to evaluate them
+    before it evaluates this recipe and you might change the order the parts run in.
+foo.forward
+    If you set a variable called foo on the recipe, it will make a foo.forward. This contains the list
+    in ascending order.
+foo.reverse
+    If you set a variable called foo on the recipe, it will make a foo.reverse. This contains the list
+    in descending order.
+
 
 missingbits:clone
 -------------------
+
+I don't like copying and pasting things in buildout, i tend to make mistakes. So I clone instead.
 
 A site with 4 zopes might look something like this::
 
@@ -105,6 +129,25 @@ could do this instead::
     recipe = missingbits:clone
     template = zope{0}
     count = 4
+
+Parameters
+~~~~~~~~~~
+
+template
+    A part to use as a base for cloning. It should not be referenced in parts and it should not be
+    reference by other parts, especially if it has a recipe. Any buildout variables it has will
+    need to be escaped by using {{ and }}. Any occurences of {0} will be replaced by the number of
+    the clone we are on.
+start
+    Number to start the range at (Default: 0, Optional)
+stop
+    Number to stop at, but not including. So start of 0 and stop of 6 will get you [0,1,2,3,4,5]. (Mandatory).
+step
+    Number to increment by. (Default: +1, Optional)
+parts
+    This variable is set by the recipe and contains a list of the parts that were generated. You can
+    pass it to any recipe taking a list of parts, but you cannot pass it to ${buildout:parts} as
+    the buildout part is evaluated too early.
 
 
 missingbits:echo
