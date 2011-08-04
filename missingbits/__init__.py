@@ -23,7 +23,9 @@ class Overlay(object):
             del config['recipe']
 
         for source in self._resolve_deps(config):
-            destinations = config.get(source, '').strip().splitlines()
+            destinations = self._strip(
+                config.get(source, '').splitlines()
+            )
 
             for dest in destinations:
                 logger = logging.getLogger(name).debug(
@@ -34,6 +36,9 @@ class Overlay(object):
                     if not buildout._raw[dest].has_key(key):
                         buildout._raw[dest][key] = keys[key]
 
+    def _strip(self, options):
+        return [item for item in options if not item == '']
+
     def _resolve_deps(self, config):
         """ Determine the dependencies between parts in the overlay part """
         visited = []
@@ -42,14 +47,14 @@ class Overlay(object):
 
         # populate only_inherits with parts that aren't inherited by others
         for values in config.itervalues():
-            for item in values.strip().splitlines():
+            for item in self._strip(values.splitlines()):
                 if not item in config.keys() and not item in only_inherits:
                     only_inherits.append(item)
 
         def applied_to(from_key):
             """ Return a part names that are applied to the given key """
             for key in config:
-                if from_key in config[key].strip().splitlines():
+                if from_key in self._strip(config[key].splitlines()):
                     yield key
 
         def visit(key):
