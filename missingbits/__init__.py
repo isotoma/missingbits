@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 
 class Overlay(object):
     """ Overlay every member of a part on top of a list of other parts """
@@ -25,10 +26,13 @@ class Overlay(object):
             destinations = config.get(source, '').strip().splitlines()
 
             for dest in destinations:
-                keys = buildout.get(source, {})
+                logger = logging.getLogger(name).debug(
+                    'overlaying %s onto %s' % (source, dest)
+                )
+                keys = buildout._raw.get(source, {})
                 for key in keys:
-                    if not buildout[dest].has_key(key):
-                        buildout[dest][key] = keys[key]
+                    if not buildout._raw[dest].has_key(key):
+                        buildout._raw[dest][key] = keys[key]
 
     def _resolve_deps(self, config):
         """ Determine the dependencies between parts in the overlay part """
