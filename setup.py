@@ -35,6 +35,7 @@ setup(
             "range = missingbits:Range",
             "clone = missingbits:Cloner",
             "echo = missingbits:Echo",
+            "overlay = missingbits:Overlay",
         ],
     }
 )

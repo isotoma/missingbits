@@ -12,6 +12,63 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
+
+class Overlay(object):
+    """ Overlay every member of a part on top of a list of other parts """
+
+    def __init__(self, buildout, name, options):
+        config = buildout.get(name, {}).copy()
+        if config.has_key('recipe'):
+            del config['recipe']
+
+        for source in self._resolve_deps(config):
+            destinations = config.get(source, '').strip().splitlines()
+
+            for dest in destinations:
+                logger = logging.getLogger(name).debug(
+                    'overlaying %s onto %s' % (source, dest)
+                )
+                keys = buildout._raw.get(source, {})
+                for key in keys:
+                    if not buildout._raw[dest].has_key(key):
+                        buildout._raw[dest][key] = keys[key]
+
+    def _resolve_deps(self, config):
+        """ Determine the dependencies between parts in the overlay part """
+        visited = []
+        sorted_keys = []
+        only_inherits = []
+
+        # populate only_inherits with parts that aren't inherited by others
+        for values in config.itervalues():
+            for item in values.strip().splitlines():
+                if not item in config.keys() and not item in only_inherits:
+                    only_inherits.append(item)
+
+        def applied_to(from_key):
+            """ Return a part names that are applied to the given key """
+            for key in config:
+                if from_key in config[key].strip().splitlines():
+                    yield key
+
+        def visit(key):
+            """ Recursively process any not-yet-visited part names """
+            if not key in visited:
+                visited.append(key)
+                for part in applied_to(key):
+                    visit(part)
+                sorted_keys.append(key)
+
+        for key in only_inherits:
+            visit(key)
+
+        return sorted_keys
+
+    def install(self):
+        return ()
+
+    update = install
 
 class Range(object):
 
