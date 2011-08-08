@@ -1,8 +1,8 @@
 Changelog
 =========
 
-0.0.2 (unreleased)
---------------
+0.0.2 (2011-08-08)
+------------------
 
 - Fix commit missing from merge
 - Fix python2.4 support
