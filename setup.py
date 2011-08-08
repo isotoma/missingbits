@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-version = 'ydev'
+version = '0.0.2dev'
 
 setup(
     name = 'missingbits',
