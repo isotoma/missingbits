@@ -81,7 +81,7 @@ class Range(object):
             if key in ("recipe", "start", "stop", "step"):
                 continue
 
-            lst = [options[key].format(i) for i in range(start, stop, step)]
+            lst = [options[key].replace("{0}", str(i)).replace("$$", "$") for i in range(start, stop, step)]
             options[key + ".forward"] = "\n".join(lst)
 
             lst.reverse()
@@ -104,8 +104,8 @@ class Cloner(object):
 
         parts = []
         for i in range(start, stop, step):
-            name = options["template"].format(i)
-            config = dict((k, v.format(i)) for (k, v) in template.iteritems())
+            name = options["template"].replace("{0}", str(i)).replace("$$", "$")
+            config = dict((k, v.replace("{0}", str(i)).replace("$$","$")) for (k, v) in template.iteritems())
 
             buildout._raw[name] = config
 
