@@ -36,6 +36,14 @@ def split(var):
 class Stack(object):
 
     def __init__(self, name, buildout):
+        """
+        ``name`` is the name of the module that is providing a stack. It is used
+        for the logger, locating files within the stack egg and to namespace the
+        various debug commands.
+
+        ``buildout`` is a buildout object as passed by the ``load`` extension
+        entrypoint.
+        """
         self.name = name
         self.buildout = buildout
 
@@ -56,6 +64,9 @@ class Stack(object):
                                self.data['buildout'].copy(), override)) #, set()))
 
     def apply(self):
+        """
+        Actually apply the config changes to the running buildout.
+        """
         self.before_apply = _unannotate(copy.deepcopy(self.data))
 
         # Reinject the original buildout so it can overlay and extend the one from the stack
