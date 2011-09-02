@@ -32,10 +32,10 @@ setup(
     ],
     entry_points = {
         "zc.buildout": [
-            "range = missingbits:Range",
-            "clone = missingbits:Cloner",
-            "echo = missingbits:Echo",
-            "overlay = missingbits:Overlay",
+            "range = missingbits.recipe:Range",
+            "clone = missingbits.recipe:Cloner",
+            "echo = missingbits.recipe:Echo",
+            "overlay = missingbits.recipe:Overlay",
         ],
     }
 )
