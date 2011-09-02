@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.0.4 (unreleased)
+0.0.4 (2011-09-02)
 ------------------
 
 - All stacks automatically get a 'path' variable that points to their assets
