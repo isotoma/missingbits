@@ -1,0 +1,206 @@
+# Copyright 2011 Isotoma Limited
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import os, copy, sys
+from zc.buildout.buildout import _update, _open, _unannotate, _print_annotate
+from zc.buildout import UserError
+import zc.buildout.easy_install
+import pkg_resources
+import logging
+
+
+def sibpath(module, path):
+    mod = __import__(module)
+    return os.path.join(os.path.dirname(mod.__file__), path)
+
+def split(var):
+    var = var.strip().split("\n")
+    for itm in var:
+        itm = itm.strip()
+        if not itm:
+            continue
+        yield itm
+
+
+class Stack(object):
+
+    def __init__(self, name, buildout):
+        self.name = name
+        self.buildout = buildout
+
+        self.log = logging.getLogger(self.name)
+
+        self.original = copy.deepcopy(self.buildout._annotated)
+        self.data = copy.deepcopy(self.buildout._annotated)
+
+        # Build a set of extensions defined already
+        self.previous_keys = set(buildout['buildout'].keys())
+        self.previous_extensions = set(split(buildout['buildout'].get('extensions', '')))
+
+    def load(self, path):
+        config_file = sibpath(self.name, path)
+        self.log.debug("Loading '%s' from stack" % config_file)
+        override = {}
+        _update(self.data, _open(os.path.dirname(config_file), config_file, [],
+                               self.data['buildout'].copy(), override)) #, set()))
+
+    def apply(self):
+        self.before_apply = _unannotate(copy.deepcopy(self.data))
+
+        # Reinject the original buildout so it can overlay and extend the one from the stack
+        _update(self.data, self.buildout._annotated)
+
+        self.buildout._annotated = copy.deepcopy(self.data)
+        self.buildout._raw = _unannotate(self.data)
+
+        self.determine_cwd()
+        self.update_buildout_options()
+        self.update_versions()
+        self.load_extensions()
+
+        self.run_commands()
+
+    def substitute(self, section, key):
+        """
+        Force the evaluation of a ``key`` in a ``section``
+        """
+        if not section in self.buildout._data:
+            # Section hasn't been resolved at all, so leave it till later
+            return
+        if key in self.buildout._data[section]:
+            del self.buildout._data[section][key]
+        self.buildout[section]._dosub(key, self.buildout._raw[section][key])
+
+    def update_versions(self):
+        """
+        Reconfigure easy_install with new version pinnings obtained from the stack
+        """
+        del self.buildout._data['versions']
+        zc.buildout.easy_install.default_versions(self.buildout["versions"])
+
+    def update_buildout_options(self):
+        """
+        Some values in [buildout] cannot safely be changed after they are set in the main buildout.
+
+        We white list some that can:
+         * 'parts' has to be refreshed or the parts the stack creates are never used
+         * Any variables that were added to the buildout object by the stack are allowed
+        """
+        self.substitute('buildout', 'parts')
+
+        keys = set(self.buildout._raw['buildout'].keys()) - self.previous_keys
+        for key in keys:
+            self.substitute('buildout', key)
+
+    def determine_cwd(self):
+        """
+        This horror reverse engineers cwd by finding all buildouts loaded
+        and working out a common prefix.
+
+        This is needed because setting ``${buildout:directory}`` changes
+        the cwd and buildout doesn't keep track of the original cwd.
+
+        This should hopefully be a reasonable default, but it isn't absolute
+        and can be overriden in buildouts.
+        """
+        def find_buildouts(buildout):
+            default_buildout = os.path.expanduser('~/.buildout/default.cfg')
+            for section in buildout.values():
+                for key, value in section.items():
+                    for v in value[1].split("[-]"):
+                        s = v.strip()
+                        if s and os.path.exists(s) and s != default_buildout:
+                            yield os.path.dirname(s)
+
+        self.buildout._raw['buildout']['cwd'] = os.path.commonprefix(set(find_buildouts(self.original)))
+        self.substitute('buildout', 'cwd')
+
+    def load_extensions(self):
+        """
+        Determine which extensions need installing
+
+        We look at the ${buildout:extensions} variable as .apply() is called,
+        rather than after the overrides from the invoking buildout have been applied
+        """
+
+        # Work out the list of extensions the stack requested
+        current_extensions = set(split(self.before_apply['buildout'].get('extensions','')))
+        extensions = current_extensions - self.previous_extensions
+
+        self.log.info("Installing %d extensions requested by stack" % len(extensions))
+
+        if not extensions:
+            return
+
+        path = [self.buildout['buildout']['develop-eggs-directory']]
+
+        if self.buildout['buildout']['offline'] == 'true':
+            dest = None
+            path.append(self.buildout['buildout']['eggs-directory'])
+        else:
+            dest = self.buildout['buildout']['eggs-directory']
+            if not os.path.exists(dest):
+                self.log.info('Creating directory %r.' % dest)
+                os.mkdir(dest)
+
+        zc.buildout.easy_install.install(
+            extensions, dest, path=path,
+            working_set=pkg_resources.working_set,
+            links = self.buildout['buildout'].get('find-links', '').split(),
+            index = self.buildout['buildout'].get('index'),
+            newest=self.buildout.newest, allow_hosts=self.buildout._allow_hosts,
+        )
+
+        # Clear cache because extensions might now let us read pages we
+        # couldn't read before.
+        zc.buildout.easy_install.clear_index_cache()
+
+    def run_commands(self):
+        if not self.name in self.buildout._raw:
+            return
+
+        if self.buildout._raw[self.name].get("dbg.annotate", None):
+            _print_annotate(self.buildout._annotated)
+            sys.exit(0)
+
+        elif self.buildout._raw[self.name].get("dbg.dump", None):
+            for name in sorted(self.buildout._raw.keys()):
+                section = self.buildout._raw[name]
+                print "[%s]" % name
+
+                if "recipe" in section:
+                    print "recipe", "=", section["recipe"]
+
+                for key in section.keys():
+                    if key != "recipe":
+                        if "\n" in section[key]:
+                            print key, "="
+                            for line in section[key].split("\n"):
+                                if line.strip():
+                                    print "   %s" % line.strip()
+                        else:
+                            print key, "=", section[key]
+
+                print ""
+
+            sys.exit(0)
+
+        elif self.buildout._raw[self.name].get("dbg.versions", None):
+            print "[versions]"
+            pkgs = sorted(self.buildout["versions"].keys())
+            for pkg in pkgs:
+                print pkg, "=", self.buildout["versions"][pkg]
+            sys.exit(0)
+
+
