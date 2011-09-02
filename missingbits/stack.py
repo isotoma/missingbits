@@ -21,7 +21,8 @@ import logging
 
 
 def sibpath(module, path):
-    mod = __import__(module)
+    __import__(module)
+    mod = sys.modules[module]
     return os.path.join(os.path.dirname(mod.__file__), path)
 
 def split(var):
@@ -48,6 +49,9 @@ class Stack(object):
         self.buildout = buildout
 
         self.log = logging.getLogger(self.name)
+
+        config = buildout[self.name]
+        config['path'] = sibpath(self.name, "")
 
         self.original = copy.deepcopy(self.buildout._annotated)
         self.data = copy.deepcopy(self.buildout._annotated)
