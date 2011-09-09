@@ -60,8 +60,10 @@ class Stack(object):
         self.previous_keys = set(buildout['buildout'].keys())
         self.previous_extensions = set(split(buildout['buildout'].get('extensions', '')))
 
-    def load(self, path):
+    def load(self, path, optional=False):
         config_file = sibpath(self.name, path)
+        if not optional and not os.path.exists(config_file):
+            raise UserError("Could not load '%s'" % path)
         self.log.debug("Loading '%s' from stack" % config_file)
         override = {}
         _update(self.data, _open(os.path.dirname(config_file), config_file, [],
