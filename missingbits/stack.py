@@ -83,8 +83,11 @@ class Stack(object):
 
     def load(self, path, optional=False):
         config_file = sibpath(self.name, path)
-        if not optional and not os.path.exists(config_file):
-            raise UserError("Could not load '%s'" % path)
+        if not os.path.exists(config_file):
+            if not optional:
+                raise UserError("Could not load '%s'" % path)
+            return
+
         self.log.debug("Loading '%s' from stack" % config_file)
         override = {}
         _update(self.data, _open(os.path.dirname(config_file), config_file, [],
