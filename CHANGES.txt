@@ -1,10 +1,13 @@
 Changelog
 =========
 
-0.0.6 (unreleased)
+0.0.6 (2011-09-15)
 ------------------
 
-- Nothing changed yet.
+- Prior to the injection of any stack configuration, buildout._data is cleared
+  (with the exception of the buildout and versions parts), causing any already-
+  resolved parts to be re-resolved once the stack has been applied, and the
+  original configuration re-applied.
 
 
 0.0.5 (2011-09-09)
