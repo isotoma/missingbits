@@ -56,9 +56,30 @@ class Stack(object):
         self.original = copy.deepcopy(self.buildout._annotated)
         self.data = copy.deepcopy(self.buildout._annotated)
 
+        self._reset_data()
+
         # Build a set of extensions defined already
         self.previous_keys = set(buildout['buildout'].keys())
         self.previous_extensions = set(split(buildout['buildout'].get('extensions', '')))
+
+    def _reset_data(self):
+        '''
+        This method controversially deletes any already-resolved parts from
+        buildout._data, excluding the buildout and versions parts, both of
+        which are dealt with separately.
+
+        The logic behind doing this is that after the stack has been applied
+        to the configuration dictionary, the original non-stack buildout is
+        re-applied, so ultimately no configuration is lost.
+        '''
+        excludes = (
+            'buildout',
+            self.buildout['buildout'].get('versions', '')
+        )
+
+        for k in self.buildout._data.keys():
+            if not k in excludes:
+                del self.buildout._data[k]
 
     def load(self, path, optional=False):
         config_file = sibpath(self.name, path)
