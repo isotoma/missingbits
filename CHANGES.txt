@@ -4,7 +4,9 @@ Changelog
 0.0.8 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Don't reset ``self.name`` when resetting things - this works around
+  ``${:path}`` being invalid and the settings the stack uses shouldn't be changing
+  in flight - its just too weird!
 
 
 0.0.7 (2011-09-15)

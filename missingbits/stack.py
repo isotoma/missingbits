@@ -73,6 +73,7 @@ class Stack(object):
         re-applied, so ultimately no configuration is lost.
         '''
         excludes = (
+            self.name,
             'buildout',
             self.buildout['buildout'].get('versions', '')
         )
