@@ -50,6 +50,7 @@ class Stack(object):
 
         self.log = logging.getLogger(self.name)
 
+        self.ensure_section(self.name)
         config = buildout[self.name]
         config['path'] = sibpath(self.name, "")
 
@@ -61,6 +62,10 @@ class Stack(object):
         # Build a set of extensions defined already
         self.previous_keys = set(buildout['buildout'].keys())
         self.previous_extensions = set(split(buildout['buildout'].get('extensions', '')))
+
+    def ensure_section(self, name):
+        """ Ensure that a section exists, even if it is empty """
+        self.buildout._raw.setdefault(name, {})
 
     def _reset_data(self):
         '''
