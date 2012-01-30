@@ -4,7 +4,19 @@ Changelog
 0.0.9 (unreleased)
 ------------------
 
-- Nothing changed yet.
+- Add a method for "peeking" at configruation files we haven't loaded yet. This
+  is useful if you have awkward inter-dependencies like your Plone config knows
+  its preferred version of Zope, but you can't load it till you have loaded
+  Zope!
+
+  You can use it like this::
+
+      value = stack.peek_unloaded("someconfig.cfg", "somesection", "somekey")
+
+- Add a method for "peeking" into data that isn't fully evaluated - data that
+  is loaded but before you have called ``apply()``. You can use it like this::
+
+      value = stack.peek("somesection", "somekey")
 
 
 0.0.8 (2011-09-21)

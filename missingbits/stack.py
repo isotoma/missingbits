@@ -94,6 +94,46 @@ class Stack(object):
         _update(self.data, _open(os.path.dirname(config_file), config_file, [],
                                self.data['buildout'].copy(), override)) #, set()))
 
+    def peek_unloaded(self, path, section, key):
+        """ Peek inside a buildout.cfg without applying it to the active buildout state """
+        config_file = sibpath(self.name, path)
+        if not os.path.exists(config_file):
+            raise UserError("Could not peek in '%s'" % config_file)
+        from ConfigParser import ConfigParser
+        c = ConfigParser()
+        c.read(config_file)
+        value = c.get(section, key)
+        if "${" in value:
+            raise UserError("%s cannot peek at ${%s:%s} because it uses variable substitution or escaping." % (self.name, section, key))
+        return value
+
+    def peek(self, section, key):
+        """
+        Peek at the current state of self.data
+
+        This will throw an exception in the following cases:
+
+          * The section isn't currently loaded
+          * The key could not be found in the section
+          * The value contains buildout substitutions - peeking should not cause the state to be modified
+        """
+
+        __doing__ = "Peeking into section '${%s:}'" % section
+        if not section in self.data:
+            raise UserError("There is no section %s currently loaded" % section)
+
+        __doing__ = "Peeking into key %s in section '%s'" % (section, key)
+        s = self.data[section]
+        if not key in s:
+            raise UserError("Could not peek at ${%s:%s}" % (section, key))
+
+        __doing__ = "Checking whether ${%s:%s} is safe to peek" % (section, key)
+        value = s[key][0]
+        if "${" in value:
+            raise UserError("${%s:%s} uses variable substitutions and cannot be accessed" % (section, key))
+
+        return value
+
     def apply(self):
         """
         Actually apply the config changes to the running buildout.
