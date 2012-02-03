@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.0.10 (unreleased)
+0.0.10 (2012-02-03)
 -------------------
 
 - Add a new recipe called Select. This can be used in conjuction with
