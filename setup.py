@@ -36,6 +36,7 @@ setup(
             "clone = missingbits.recipe:Cloner",
             "echo = missingbits.recipe:Echo",
             "overlay = missingbits.recipe:Overlay",
+            "select = missingbits.recipe:Select",
         ],
     }
 )

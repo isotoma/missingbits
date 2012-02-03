@@ -150,6 +150,30 @@ parts
     the buildout part is evaluated too early.
 
 
+missingbits:select
+------------------
+
+This recipe can be used to change what configuration is used base on other
+variables. For example, it is most excellent when combined with
+isotoma.recipe.facts::
+
+    [facts]
+    recipe = isotoma.recipe.facts
+
+    [host-lucid]
+    somesetting = 1
+
+    [host-karmic]
+    somesetting = 2
+
+    [host]
+    recipe = missingbits:select
+    case = ${facts:lsb.codename}
+
+With this example, you would be able to use ``${host:somesetting}`` and know
+that it is suitable for the environment you are in.
+
+
 missingbits:echo
 ------------------
 

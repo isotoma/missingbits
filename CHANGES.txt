@@ -4,7 +4,22 @@ Changelog
 0.0.10 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Add a new recipe called Select. This can be used in conjuction with
+  isotoma.recipe.facts to customize your buildout based on the environment you
+  are running it in::
+
+  [facts]
+  recipe = isotoma.recipe.facts
+
+  [host-lucid]
+  somesetting = 1
+
+  [host-karmic]
+  somesetting = 2
+
+  [host]
+  recipe = missingbits:select
+  case = ${facts:lsb.codename}
 
 
 0.0.9 (2012-01-30)

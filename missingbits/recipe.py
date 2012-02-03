@@ -75,6 +75,23 @@ class Overlay(object):
 
     update = install
 
+
+class Select(object):
+
+    def __init__(self, buildout, name, options):
+        section = buildout[options["case"]]
+
+        for k, v in section.iteritems():
+            if k.startswith("_"):
+                continue
+            options[k] = v
+
+    def install(self):
+        return ()
+
+    update = install
+
+
 class Range(object):
 
     def __init__(self, buildout, name, options):
