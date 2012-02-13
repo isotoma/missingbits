@@ -19,6 +19,10 @@ import zc.buildout.easy_install
 import pkg_resources
 import logging
 
+try:
+    from zc.buildout.buildout import _sys_executable_has_broken_dash_S
+except ImportError:
+    _sys_executable_has_broken_dash_S = True
 
 def sibpath(module, path):
     __import__(module)
@@ -35,6 +39,12 @@ def split(var):
 
 
 class Stack(object):
+
+    SAFE_BUILDOUT_KEYS = (
+        'offline', 'newest', 'prefer-final', 'use-dependency-links',
+        'allow-picked-versions', 'unzip', 'parts', 'include-site-packages',
+        'exec-sitecustomize', 'allowed-eggs-from-site-packages',
+         )
 
     def __init__(self, name, buildout):
         """
@@ -146,8 +156,19 @@ class Stack(object):
         self.before_apply = _unannotate(copy.deepcopy(self.data))
 
         # Reinject the original buildout so it can overlay and extend the one from the stack
-        _update(self.data, self.buildout._annotated)
+        # We don't reapply default values as the stack might want to override defaults.
+        def filter_annotations(annotated):
+            out = {}
+            for section, values in annotated.items():
+                out[section] = {}
+                for k, v in values.items():
+                    if v[1] == 'DEFAULT_VALUE':
+                        continue
+                    out[section][k] = v
+            return out
+        _update(self.data, filter_annotations(self.buildout._annotated))
 
+        # Actually update the buildout
         self.buildout._annotated = copy.deepcopy(self.data)
         self.buildout._raw = _unannotate(self.data)
 
@@ -184,11 +205,41 @@ class Stack(object):
          * 'parts' has to be refreshed or the parts the stack creates are never used
          * Any variables that were added to the buildout object by the stack are allowed
         """
-        self.substitute('buildout', 'parts')
-
         keys = set(self.buildout._raw['buildout'].keys()) - self.previous_keys
         for key in keys:
             self.substitute('buildout', key)
+
+        for key in self.SAFE_BUILDOUT_KEYS:
+            self.substitute('buildout', key)
+
+        options = self.buildout['buildout']
+
+        # Reset buildout behaviour
+        self.buildout.offline = options.get_bool('offline')
+        if self.buildout.offline:
+            options['newest'] = 'false'
+        self.buildout.newest = options.get_bool('newest')
+
+        ei = zc.buildout.easy_install
+        ei.prefer_final(options.get_bool('prefer-final'))
+        ei.use_dependency_links(options.get_bool('use-dependency-links'))
+        ei.allow_picked_versions(options.get_bool('allow-picked-versions'))
+        if options.get_bool('unzip'):
+            zc.buildout.easy_install.always_unzip(True)
+
+
+        # Buildout 1.5.2 features to do with egg containment
+        if hasattr(ei, "allowed_eggs_from_site_packages"):
+            isp = self.buildout.include_site_packages = options.get_bool('include-site-packages')
+            self.buildout.exec_sitecustomize = options.get_bool('exec-sitecustomize')
+
+            allowed_eggs = options.get_list("allowed-eggs-from-site-packages")
+            ei.allowed_eggs_from_site_packages(allowed_eggs)
+
+            if (_sys_executable_has_broken_dash_S and (not isp or allowed_eggs != ['*'])):
+                # We can't do this if the executable has a broken -S.
+                warnings.warn(zc.buildout.easy_install.BROKEN_DASH_S_WARNING)
+                self.buildout.include_site_packages = True
 
     def determine_cwd(self):
         """

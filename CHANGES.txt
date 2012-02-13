@@ -4,7 +4,15 @@ Changelog
 0.0.11 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- The act of importing missingbits will monkey-patch the Options object to
+  give you get_bool and get_list helpers.
+
+- Stack: Default buildout options are no longer chosen over values set in the
+  stack.
+
+- Stack: More buildout section variables can now be reset from the stack,
+  in particular the 'unzip', 'allow-picked-versions', 'newest' and
+  'allowed-eggs-from-site-packages' options.
 
 
 0.0.10 (2012-02-03)

@@ -12,3 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# Apply Options class monkey patches
+from missingbits import options
+del options
+
+
+
