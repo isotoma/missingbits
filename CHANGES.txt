@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.0.14 (unreleased)
+0.0.14 (2012-02-14)
 -------------------
 
 - Improve 1.4.3 support.
