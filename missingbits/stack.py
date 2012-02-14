@@ -186,6 +186,10 @@ class Stack(object):
         if not section in self.buildout._data:
             # Section hasn't been resolved at all, so leave it till later
             return
+        if not section in self.buildout._raw:
+            return
+        if not key in self.buildout._raw[section]:
+            return
         if key in self.buildout._data[section]:
             del self.buildout._data[section][key]
         self.buildout[section]._dosub(key, self.buildout._raw[section][key])
