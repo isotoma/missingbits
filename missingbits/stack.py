@@ -219,16 +219,22 @@ class Stack(object):
         options = self.buildout['buildout']
 
         # Reset buildout behaviour
-        self.buildout.offline = options.get_bool('offline')
-        if self.buildout.offline:
-            options['newest'] = 'false'
-        self.buildout.newest = options.get_bool('newest')
+        if "offline" in options:
+            self.buildout.offline = options.get_bool('offline')
+            if self.buildout.offline:
+                options['newest'] = 'false'
+
+        if "newest" in options:
+            self.buildout.newest = options.get_bool('newest')
 
         ei = zc.buildout.easy_install
-        ei.prefer_final(options.get_bool('prefer-final'))
-        ei.use_dependency_links(options.get_bool('use-dependency-links'))
-        ei.allow_picked_versions(options.get_bool('allow-picked-versions'))
-        if options.get_bool('unzip'):
+        if "prefer-final" in options:
+            ei.prefer_final(options.get_bool('prefer-final'))
+        if "use-dependency-links" in options:
+            ei.use_dependency_links(options.get_bool('use-dependency-links'))
+        if "allow-picked-versions" in options:
+            ei.allow_picked_versions(options.get_bool('allow-picked-versions'))
+        if "unzip" in options and options.get_bool('unzip'):
             zc.buildout.easy_install.always_unzip(True)
 
 
