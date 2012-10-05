@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import os, copy, sys
-from zc.buildout.buildout import _update, _open, _unannotate, _print_annotate
+from zc.buildout.buildout import _update, _unannotate, _print_annotate
 from zc.buildout import UserError
 import zc.buildout.easy_install
 import pkg_resources
@@ -37,6 +37,14 @@ def split(var):
             continue
         yield itm
 
+def _open(base, filename, seen, dl_options, override, downloaded):
+    # For now need to support 1.4.3 and 1.6.3...
+    from zc.buildout.buildout import _open
+    try:
+        return _open(base, filename, seen, dl_options, override, downloaded)
+    except TypeError:
+        return _open(base, filename, seen, dl_options, override)
+        
 
 class Stack(object):
 
@@ -107,7 +115,7 @@ class Stack(object):
         self.log.debug("Loading '%s' from stack" % config_file)
         override = {}
         _update(self.data, _open(os.path.dirname(config_file), config_file, [],
-                               self.data['buildout'].copy(), override)) #, set()))
+                               self.data['buildout'].copy(), override, set()))
 
     def peek_unloaded(self, path, section, key):
         """ Peek inside a buildout.cfg without applying it to the active buildout state """
