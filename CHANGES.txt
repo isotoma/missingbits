@@ -4,7 +4,7 @@ Changelog
 0.0.16 (unreleased)
 -------------------
 
-- Nothing changed yet.
+- Support loading config from absolute paths.
 
 
 0.0.15 (2012-10-05)

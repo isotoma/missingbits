@@ -44,7 +44,7 @@ def _open(base, filename, seen, dl_options, override, downloaded):
         return _open(base, filename, seen, dl_options, override, downloaded)
     except TypeError:
         return _open(base, filename, seen, dl_options, override)
-        
+
 
 class Stack(object):
 
@@ -106,7 +106,9 @@ class Stack(object):
                 del self.buildout._data[k]
 
     def load(self, path, optional=False):
-        config_file = sibpath(self.name, path)
+        config_file = path
+        if not path.startswith("/"):
+            config_file = sibpath(self.name, path)
         if not os.path.exists(config_file):
             if not optional:
                 raise UserError("Could not load '%s'" % path)
